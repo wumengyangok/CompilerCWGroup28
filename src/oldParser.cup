@@ -1,0 +1,366 @@
+import java_cup.runtime.*;
+import java.lang.*;
+
+
+parser code {:
+	public boolean syntaxErrors = false;
+	public void syntax_error(Symbol current_token) { report_error(
+         "Syntax error at line " + (current_token.left+1) + ", column "
+         				+ current_token.right, null);
+	}
+:};
+
+/* ******** terminal ********** */
+terminal		INTEGER, CHARACTER, RATIONAL, FLOAT, BOOLEAN, TOP, STRING;
+terminal		DICTIONARY, SEQUENCE;
+terminal		TYPEDEF, FUNCTIONDEF, ALIAS, VOID;
+terminal		IF, ENDIF, ELSE, ELSEIF, THEN, WHILE, FORALL, RETURN, READ, PRINT, DO, ENDDO, IN;
+terminal 		MAIN;
+terminal 		LENGTH;
+terminal		LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, SEMICOLON, COMMA, COLON, DOT;
+terminal		RANGLEBRACKT;
+terminal 		PLUS, MINUS, TIMES, DIVIDE, ASSIGN, POWER, EQEQ, NOTEQ, LESSEQ, LESS, ANDAND, OROR,NOT, CONCATENATE;
+terminal BOOLEAN_LITERAL_TRUE, BOOLEAN_LITERAL_FALSE;
+terminal INTEGER_LITERAL;
+terminal FLOAT_LITERAL;
+terminal RATIONAL_LITERAL;
+terminal STRING_LITERAL, IDENTIFIER;
+terminal CHARACTER_LITERAL;
+
+
+/* ******** non terminal ********** */
+non terminal goal;
+	/* Section 1: declaration */
+non terminal declaration_list_opt, declaration_list, declaration;
+non terminal variable_declaration;
+non terminal function_declaration;
+non terminal data_type_declaration;
+non terminal alias_type;
+	
+	/* Section 2: expression */
+non terminal expression_list, expression_opt, expression;
+non terminal length_retrieve, method_call_expression;
+non terminal literal;
+non terminal primary_expression, unary_expression, multiplicative_expression, additive_expression,
+			equlity_expression, and_expression, or_expression, concatenate_expression, in_expression, operation_expression;
+non terminal index_list, index, dic_seq_access;
+	
+	/* Section 3: statement */
+non terminal block_statement_opt, block_statement_list, block_statement;
+non terminal statement;
+non terminal return_statement, if_statements, while_statement, forall_statement, 
+			read_statement, print_statement, assign_statement;
+non terminal elseif_then_block_statement_opt, elseif_then_statement_list, elseif_then_statement;
+non terminal else_statement_opt, else_statement;
+
+	/* Section 4: type */
+non terminal type;
+non terminal primitive_type, aggragate_type;
+non terminal dictionary_literal, dictionary_entry_list_opt, dictionary_entry_list, dictionary_entry;
+non terminal sequence_literal;
+
+	/* Section 5: variable */
+non terminal variable_name, simple_name, complex_name, left_hand_side;
+
+	/* Section 6: function */
+non terminal main_function;
+non terminal function_body, function_header;
+non terminal function_return_type;
+non terminal parameter_list_opt, parameter_list, parameter;
+non terminal input_opt;
+
+	/* Section 7: data structure */
+non terminal data_type_header, data_type_body;
+
+
+/* ******** grammar *********/
+
+precedence nonassoc ASSIGN; 				/* prevent multiple assignment */
+
+precedence left CONCATENATE;
+precedence left PLUS, MINUS;
+precedence left TIMES, DIVIDE;
+precedence left POWER;
+precedence left LBRACK;
+
+start with goal;
+
+goal 					::= declaration_list_opt 
+		  					main_function
+		  					declaration_list_opt
+		  				;
+
+declaration_list_opt 	::= declaration_list
+						| 	/* empty */
+						;
+
+declaration_list 		::= declaration_list declaration
+						|	declaration
+						;
+
+declaration				::= variable_declaration
+						|	function_declaration
+						|	data_type_declaration
+						;
+
+aggragate_type			::= DICTIONARY LESS type COMMA type RANGLEBRACKT 
+						|	SEQUENCE LESS type RANGLEBRACKT 
+						;
+
+alias_type				::= ALIAS type type
+						;
+
+assign_statement		::= left_hand_side ASSIGN expression_list SEMICOLON
+						;
+
+left_hand_side 			::= variable_name
+						|	dic_seq_access left_hand_side
+						|	dic_seq_access
+						;
+
+block_statement_opt ::= block_statement_list
+						|	/* empty */
+						;
+
+block_statement_list	::= block_statement_list block_statement
+						|	block_statement
+						;
+
+block_statement 		::= variable_declaration
+						|	statement
+						|	data_type_declaration
+						;
+
+complex_name			::= variable_name DOT IDENTIFIER 
+						;
+
+/* data type declaration */
+data_type_declaration 	::= data_type_header 
+							data_type_body
+							SEMICOLON 
+						;
+
+data_type_header		::= TYPEDEF simple_name 
+						;
+
+data_type_body			::= LBRACE parameter_list_opt RBRACE 
+						;
+
+dictionary_literal		::= LBRACE dictionary_entry_list_opt RBRACE 
+						;
+
+dictionary_entry_list_opt ::=dictionary_entry_list 
+						|	/* empty */
+						;
+
+dictionary_entry_list 	::= dictionary_entry_list COMMA dictionary_entry
+						| dictionary_entry
+						;
+
+dictionary_entry 		::= literal COLON literal
+						;
+ 
+expression_list 		::= expression_list COMMA expression 
+						|	expression
+						;
+
+primary_expression		::= literal
+						|	LPAREN expression RPAREN
+						|	variable_name 
+						|	method_call_expression
+						|	dic_seq_access 
+						|	length_retrieve
+						;
+
+unary_expression		::= primary_expression
+						|	NOT unary_expression
+						|	PLUS unary_expression
+						|	MINUS unary_expression
+						|	unary_expression POWER primary_expression
+						;
+
+multiplicative_expression ::= unary_expression
+						|	multiplicative_expression TIMES unary_expression
+						|	multiplicative_expression DIVIDE unary_expression
+						;
+
+additive_expression		::= multiplicative_expression
+						|	additive_expression PLUS multiplicative_expression
+						|	additive_expression MINUS multiplicative_expression
+						;
+
+equlity_expression		::= additive_expression
+						|	equlity_expression EQEQ additive_expression
+						|	equlity_expression NOTEQ additive_expression
+						|	equlity_expression LESS additive_expression
+						|	equlity_expression LESSEQ additive_expression
+						;
+
+and_expression 			::= equlity_expression
+						|	and_expression ANDAND equlity_expression
+						;
+
+or_expression			::= and_expression
+						|	or_expression OROR and_expression
+						;
+
+concatenate_expression	::= or_expression 
+						|	concatenate_expression CONCATENATE or_expression
+						;
+
+in_expression 			::= concatenate_expression
+						|	in_expression IN concatenate_expression
+						;
+
+operation_expression	::= in_expression
+						;
+
+expression 				::= operation_expression 
+						;
+
+expression_opt 			::= expression
+						|	/* empty*/
+						;
+
+/* function declaration */
+function_declaration	::= function_header 			
+							function_body
+							SEMICOLON
+						;
+
+function_header			::= FUNCTIONDEF function_return_type simple_name LPAREN parameter_list_opt RPAREN
+						;
+
+function_body			::= LBRACE block_statement_list RBRACE
+						;
+
+function_return_type	::= type
+						|	VOID
+						;
+
+if_statements			::= IF expression THEN block_statement_opt elseif_then_block_statement_opt 
+							else_statement_opt ENDIF
+						;
+
+elseif_then_block_statement_opt ::= elseif_then_statement_list
+						|	/* empty */
+						;
+
+elseif_then_statement_list ::=elseif_then_statement_list elseif_then_statement
+						|	elseif_then_statement
+						;
+
+elseif_then_statement 	::= ELSEIF expression THEN block_statement_opt
+						;
+
+else_statement_opt ::= else_statement
+						|	/* empty */
+						;
+
+else_statement 			::= ELSE block_statement_opt
+						;
+
+input_opt				::= expression_list
+						|	/* empty */
+						;
+
+length_retrieve			::= LENGTH LPAREN variable_name RPAREN
+						;
+
+literal 				::= INTEGER_LITERAL
+						|	FLOAT_LITERAL
+						|	CHARACTER_LITERAL
+						|	RATIONAL_LITERAL
+						|	BOOLEAN_LITERAL_TRUE
+						|	BOOLEAN_LITERAL_FALSE
+						|	STRING_LITERAL 
+						|	dictionary_literal 
+						|	sequence_literal 
+						;
+
+main_function			::= MAIN function_body SEMICOLON
+						;
+
+method_call_expression	::= variable_name LPAREN input_opt RPAREN
+						;
+
+
+parameter_list_opt	 	::= parameter_list
+						| 	/* empty */
+						;
+
+parameter_list 	 		::= parameter_list COMMA parameter
+						| parameter
+						;
+
+parameter 	 			::= type simple_name
+						;
+
+primitive_type			::= INTEGER
+						|	FLOAT
+						|	RATIONAL
+						|	CHARACTER
+						|	BOOLEAN
+						|	STRING
+						|	TOP
+						;
+
+print_statement			::= PRINT expression SEMICOLON
+						;
+
+read_statement			::= READ variable_name SEMICOLON
+						;
+
+return_statement		::= RETURN expression_opt SEMICOLON 
+						;
+
+dic_seq_access			::= variable_name index_list
+						;
+
+index_list				::= index_list index 
+						|	index 
+						;
+
+index					::= LBRACK expression COLON expression RBRACK 
+						|	LBRACK expression COLON RBRACK 
+						|	LBRACK COLON expression RBRACK 
+						|	LBRACK expression RBRACK 
+						;
+
+sequence_literal		::= LBRACK expression_list RBRACK 
+						|	LBRACK /* empty */ RBRACK
+						;
+
+type 					::= primitive_type
+						|	aggragate_type 
+						|	IDENTIFIER 
+						;
+
+simple_name				::= IDENTIFIER 
+						;
+
+statement 				::= return_statement
+						|	if_statements
+						|	while_statement
+						|	forall_statement
+						|	read_statement
+						|	print_statement
+						|	assign_statement
+						|	method_call_expression SEMICOLON
+						;
+
+/* variable declaration */
+variable_declaration	::= type variable_name SEMICOLON 
+						|	type variable_name ASSIGN expression_list SEMICOLON
+						|	alias_type SEMICOLON 
+						;
+
+variable_name			::= simple_name 
+						|	complex_name 
+						;
+
+while_statement			::= WHILE expression DO block_statement_opt ENDDO
+						;
+
+forall_statement		::= FORALL LPAREN expression RPAREN DO block_statement_opt ENDDO
+						;
