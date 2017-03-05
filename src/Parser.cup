@@ -36,6 +36,8 @@ non terminal variable_declaration;
 non terminal function_declaration;
 non terminal data_type_declaration;
 non terminal alias_type;
+non terminal statement_list, statement_list_opt;
+non terminal in_func_decl, in_func_decl_list, in_func_decl_list_opt;
 	
 	/* Section 2: expression */
 non terminal expression_list, expression_opt, expression;
@@ -137,8 +139,30 @@ function_declaration	::= function_header
 function_header			::= FUNCTIONDEF simple_name LPAREN parameter_list_opt RPAREN
 						;
 
-function_body			::= LBRACE block_statement_list RBRACE
+function_body			::= LBRACE in_func_decl_list statement_list RBRACE
+                        | LBRACE in_func_decl_list RBRACE
+                        | LBRACE statement_list RBRACE
 						;
+
+in_func_decl_list_opt   ::= in_func_decl_list
+                        | /* empty */
+                        ;
+
+in_func_decl_list       ::= in_func_decl_list in_func_decl
+                        | in_func_decl
+                        ;
+
+in_func_decl            ::= variable_declaration
+                        | data_type_declaration
+                        ;
+
+statement_list_opt      ::= statement_list
+                        |   /* empty */
+                        ;
+
+statement_list          ::= statement
+                        | statement_list statement
+                        ;
 
 function_return_type	::= COLON type
 						|	/* null */
@@ -280,6 +304,7 @@ dictionary_entry 		::= literal COLON literal
 sequence_literal		::= LBRACK expression_list RBRACK 
 						|	LBRACK /* empty */ RBRACK
 						;
+
 
 /* block statement */
 block_statement_opt ::= block_statement_list
