@@ -36,8 +36,8 @@ non terminal variable_declaration;
 non terminal function_declaration;
 non terminal data_type_declaration;
 non terminal alias_type;
-non terminal statement_list, statement_list_opt;
-non terminal in_func_decl, in_func_decl_list, in_func_decl_list_opt;
+non terminal statement_list;
+non terminal in_func_decl, in_func_decl_list;
 	
 	/* Section 2: expression */
 non terminal expression_list, expression_opt, expression;
@@ -144,20 +144,12 @@ function_body			::= LBRACE in_func_decl_list statement_list RBRACE
                         | LBRACE statement_list RBRACE
 						;
 
-in_func_decl_list_opt   ::= in_func_decl_list
-                        | /* empty */
-                        ;
-
 in_func_decl_list       ::= in_func_decl_list in_func_decl
                         | in_func_decl
                         ;
 
 in_func_decl            ::= variable_declaration
                         | data_type_declaration
-                        ;
-
-statement_list_opt      ::= statement_list
-                        |   /* empty */
                         ;
 
 statement_list          ::= statement
@@ -167,6 +159,84 @@ statement_list          ::= statement
 function_return_type	::= COLON type
 						|	/* null */
 						;
+
+
+
+/* block statement */
+block_statement_opt ::= block_statement_list
+						|	/* empty */
+						;
+
+block_statement_list	::= block_statement_list block_statement
+						|	block_statement
+						;
+
+block_statement 		::= statement
+						;
+
+statement 				::= return_statement
+						|	if_statements
+						|	loop_statement
+						|	break_statement
+						|	read_statement
+						|	print_statement
+						|	assign_statement
+						|	method_call_expression SEMICOLON
+						;
+
+return_statement		::= RETURN expression_opt SEMICOLON 
+						;
+
+print_statement			::= PRINT expression SEMICOLON
+						;
+
+read_statement			::= READ variable_name SEMICOLON
+						;
+
+assign_statement		::= left_hand_side ASSIGN expression_list SEMICOLON
+						;
+
+left_hand_side 			::= variable_name
+						|	dic_seq_access left_hand_side
+						|	dic_seq_access
+						;
+
+dic_seq_access			::= variable_name index_list
+						;
+
+index_list				::= index_list index 
+						|	index 
+						;
+
+index					::= LBRACK expression COLON expression RBRACK 
+						|	LBRACK expression COLON RBRACK 
+						|	LBRACK COLON expression RBRACK 
+						|	LBRACK expression RBRACK 
+						;
+
+loop_statement			::= LOOP block_statement_list POOL
+						;
+
+break_statement		    ::= BREAK SEMICOLON
+						|   BREAK expression SEMICOLON
+						;
+
+if_statements			::= IF expression THEN block_statement_opt else_statement_opt ENDIF
+						;
+
+else_statement_opt ::= else_statement
+						|	/* empty */
+						;
+
+else_statement 			::= ELSE block_statement_list
+						;
+
+method_call_expression	::= QUESTIONMARK expression QUESTIONMARK variable_name LPAREN input_opt RPAREN
+						;
+
+input_opt				::= expression_list
+						|	/* empty */
+						;	
 
 /* variable declaration */
 variable_declaration	::= variable_name COLON type SEMICOLON 
@@ -304,82 +374,4 @@ dictionary_entry 		::= literal COLON literal
 sequence_literal		::= LBRACK expression_list RBRACK 
 						|	LBRACK /* empty */ RBRACK
 						;
-
-
-/* block statement */
-block_statement_opt ::= block_statement_list
-						|	/* empty */
-						;
-
-block_statement_list	::= block_statement_list block_statement
-						|	block_statement
-						;
-
-block_statement 		::= variable_declaration
-						|	statement
-						|	data_type_declaration
-						;
-
-statement 				::= return_statement
-						|	if_statements
-						|	loop_statement
-						|	break_statement
-						|	read_statement
-						|	print_statement
-						|	assign_statement
-						|	method_call_expression SEMICOLON
-						;
-
-return_statement		::= RETURN expression_opt SEMICOLON 
-						;
-
-print_statement			::= PRINT expression SEMICOLON
-						;
-
-read_statement			::= READ variable_name SEMICOLON
-						;
-
-assign_statement		::= left_hand_side ASSIGN expression_list SEMICOLON
-						;
-
-left_hand_side 			::= variable_name
-						|	dic_seq_access left_hand_side
-						|	dic_seq_access
-						;
-
-dic_seq_access			::= variable_name index_list
-						;
-
-index_list				::= index_list index 
-						|	index 
-						;
-
-index					::= LBRACK expression COLON expression RBRACK 
-						|	LBRACK expression COLON RBRACK 
-						|	LBRACK COLON expression RBRACK 
-						|	LBRACK expression RBRACK 
-						;
-
-loop_statement			::= LOOP block_statement_list POOL
-						;
-
-break_statement		    ::= BREAK SEMICOLON
-						|   BREAK expression SEMICOLON
-						;
-
-if_statements			::= IF expression THEN block_statement_opt else_statement_opt ENDIF
-						;
-
-else_statement_opt ::= else_statement
-						|	/* empty */
-						;
-
-else_statement 			::= ELSE block_statement_list
-						;
-
-method_call_expression	::= QUESTIONMARK expression QUESTIONMARK variable_name LPAREN input_opt RPAREN
-						;
-
-input_opt				::= expression_list
-						|	/* empty */
-						;			
+		
