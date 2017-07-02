@@ -1,0 +1,11 @@
+Paragraph:  14
+Problem: it is not clear if a normal function can be empty.
+Our solution: since many languages allow such declaration, function with empty body will be accepted by our parser.
+
+Paragraph: 13
+Problem: it is not clear if type declaration and function declaration can be inside main function.
+Our solution: we find that type declaration in main function is allowed in a test case, so we assume that type and function declarations are accepted in our implementation.
+
+Paragraph: 11
+Problem: it is not clear whether we can omit both the start and end indices in sequence slicing, like "foo = bar[:]".
+Our solution: this is possible in many other languages that support list slicing, so our compiler accepts this syntax.

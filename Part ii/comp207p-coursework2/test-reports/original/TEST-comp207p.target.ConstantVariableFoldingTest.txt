@@ -1,0 +1,36 @@
+Testsuite: comp207p.target.ConstantVariableFoldingTest
+Tests run: 33, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.031 sec
+
+Testcase: testPrivateMethod took 0.001 sec
+Testcase: testArithmeticDouble took 0 sec
+Testcase: testMethodThree took 0 sec
+Testcase: testcaseStatement took 0 sec
+Testcase: testDoubleMethod1 took 0 sec
+Testcase: testDoubleMethod2 took 0 sec
+Testcase: testDoubleMethod3 took 0 sec
+Testcase: testMethodFour took 0 sec
+Testcase: testLongMethod1 took 0 sec
+Testcase: testLongMethod2 took 0 sec
+Testcase: testLongMethod3 took 0.001 sec
+Testcase: testComparison1 took 0 sec
+Testcase: testComparison2 took 0 sec
+Testcase: testComparison3 took 0 sec
+Testcase: testNegation1 took 0 sec
+Testcase: testArithmeticComplex took 0 sec
+Testcase: testFloatMethod1 took 0 sec
+Testcase: testFloatMethod2 took 0 sec
+Testcase: testFloatMethod3 took 0 sec
+Testcase: testParameters took 0 sec
+Testcase: testMethodOne took 0 sec
+Testcase: testMethodTwo took 0 sec
+Testcase: testInstanceVariable took 0 sec
+Testcase: testNestedLooping took 0 sec
+Testcase: testArithmeticInt took 0 sec
+Testcase: testArithmeticLong took 0 sec
+Testcase: testWhileLoop1 took 0 sec
+Testcase: testForLoop1 took 0 sec
+Testcase: testDoLoop1 took 0 sec
+Testcase: testArithmeticFloat took 0 sec
+Testcase: testIntMethod1 took 0 sec
+Testcase: testIntMethod2 took 0 sec
+Testcase: testIntMethod3 took 0 sec
